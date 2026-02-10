@@ -1,0 +1,2 @@
+radioId,timestamp,datetime_utc,latitude,longitude,altitude,nodeId,rssi,snr,hopLimit
+!test1234,1739219200000,2025-02-10T20:26:40.000Z,37.774900,-122.419400,50.0,!abc45678,-85,8.5,0
