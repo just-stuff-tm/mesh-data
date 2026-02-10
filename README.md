@@ -1,6 +1,6 @@
 # mesh-data
 
-Public dataset of Meshtastic network scans collected via [mesh-utility-tracker](https://github.com/just-stuff-tm/mesh-utility-tracker).
+Public dataset of Meshcore network scans collected via [mesh-utility-tracker](https://github.com/just-stuff-tm/mesh-utility-tracker/tree/mesh-utility).
 
 ## Data Structure
 
@@ -151,9 +151,6 @@ my_scans = all_scans[all_scans['radioId'] == '!abcd1234']
 # Filter by signal strength
 strong_signals = all_scans[all_scans['rssi'] > -80]
 
-# Find zero-hop scans
-zero_hop = all_scans[all_scans['hopLimit'].fillna(0) == 0]
-
 # Export filtered data
 my_scans.to_csv('my-filtered-scans.csv', index=False)
 ```
@@ -164,8 +161,6 @@ my_scans.to_csv('my-filtered-scans.csv', index=False)
 # Find all scans from a radio
 grep "!abcd1234" scans/**/*.csv
 
-# Find zero-hop scans (empty or 0 in hopLimit column)
-awk -F',' '$10 == "" || $10 == "0"' scans/**/*.csv
 
 # Find strong signals (rssi > -70)
 awk -F',' '$8 > -70' scans/**/*.csv
@@ -259,15 +254,15 @@ You are free to:
 Data is automatically collected from mesh-utility-tracker users who opt-in to sharing.
 
 To contribute scans:
-1. Install [mesh-utility-tracker](https://just-stuff-tm.github.io/mesh-utility-tracker/)
-2. Connect your Meshtastic device
+1. Install [mesh-utility-tracker](https://mesh-utility-tracker.pages.dev)
+2. Connect your Meshcore companion device
 3. Enable "Share scan data" in Settings
 4. Scans are automatically uploaded to this repository
 
 ## Contact
 
-- Report issues: [mesh-utility-tracker/issues](https://github.com/just-stuff-tm/mesh-utility-tracker/issues)
-- Request data deletion: [Create issue](https://github.com/just-stuff-tm/mesh-utility-tracker/issues/new?labels=data-deletion)
+- Report issues: [mesh-utility-tracker/issues](https://github.com/just-stuff-tm/mesh-data/issues)
+- Request data deletion: connect your radio that you want deleted and  Click "Delete My Data"
 
 ## Statistics
 
