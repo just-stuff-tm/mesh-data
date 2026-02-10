@@ -62,13 +62,13 @@ Each batch file contains an array of scan records:
         "nodeId": "!def45678",
         "rssi": -85,
         "snr": 8.5,
-        "hopLimit": 3
+        "hopLimit": 0
       },
       {
         "nodeId": "!ghi91011",
         "rssi": -92,
         "snr": 5.2,
-        "hopLimit": 2
+        "hopLimit": 0
       }
     ]
   }
@@ -87,7 +87,7 @@ Each batch file contains an array of scan records:
   - `nodeId`: Unique identifier of detected node
   - `rssi`: Received Signal Strength Indicator (dBm)
   - `snr`: Signal-to-Noise Ratio (dB)
-  - `hopLimit`: Remaining hops in packet (optional)
+
 
 ## Data Privacy
 
