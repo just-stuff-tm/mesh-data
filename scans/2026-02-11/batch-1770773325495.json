@@ -1,0 +1,322 @@
+[
+  {
+    "radioId": "AD864DC7",
+    "timestamp": 1770770748136,
+    "location": {
+      "lat": 40.7561395,
+      "lon": -77.869719,
+      "altitude": 365
+    },
+    "nodes": [
+      {
+        "nodeId": "8BC192AD",
+        "rssi": -119,
+        "snr": -3
+      }
+    ]
+  },
+  {
+    "radioId": "AD864DC7",
+    "timestamp": 1770770769136,
+    "location": {
+      "lat": 40.7561395,
+      "lon": -77.869719,
+      "altitude": 365
+    },
+    "nodes": [
+      {
+        "nodeId": "8BC192AD",
+        "rssi": -119,
+        "snr": -2.25
+      }
+    ]
+  },
+  {
+    "radioId": "AD864DC7",
+    "timestamp": 1770770789123,
+    "location": {
+      "lat": 40.7561395,
+      "lon": -77.869719,
+      "altitude": 365
+    },
+    "nodes": [
+      {
+        "nodeId": "8BC192AD",
+        "rssi": -119,
+        "snr": -3
+      }
+    ]
+  },
+  {
+    "radioId": "AD864DC7",
+    "timestamp": 1770770808251,
+    "location": {
+      "lat": 40.7561395,
+      "lon": -77.869719,
+      "altitude": 365
+    },
+    "nodes": [
+      {
+        "nodeId": "8BC192AD",
+        "rssi": -119,
+        "snr": -3
+      }
+    ]
+  },
+  {
+    "radioId": "AD864DC7",
+    "timestamp": 1770770907526,
+    "location": {
+      "lat": 40.7561395,
+      "lon": -77.869719,
+      "altitude": 365
+    },
+    "nodes": [
+      {
+        "nodeId": "8BC192AD",
+        "rssi": -115,
+        "snr": 1
+      }
+    ]
+  },
+  {
+    "radioId": "AD864DC7",
+    "timestamp": 1770770927595,
+    "location": {
+      "lat": 40.7561395,
+      "lon": -77.869719,
+      "altitude": 365
+    },
+    "nodes": [
+      {
+        "nodeId": "8BC192AD",
+        "rssi": -115,
+        "snr": 1
+      }
+    ]
+  },
+  {
+    "radioId": "AD864DC7",
+    "timestamp": 1770772443111,
+    "location": {
+      "lat": 40.7561395,
+      "lon": -77.869719,
+      "altitude": 365
+    },
+    "nodes": [
+      {
+        "nodeId": "8BC192AD",
+        "rssi": -119,
+        "snr": -3.25
+      }
+    ]
+  },
+  {
+    "radioId": "AD864DC7",
+    "timestamp": 1770772483131,
+    "location": {
+      "lat": 40.7561395,
+      "lon": -77.869719,
+      "altitude": 365
+    },
+    "nodes": [
+      {
+        "nodeId": "8BC192AD",
+        "rssi": -121,
+        "snr": -4.5
+      }
+    ]
+  },
+  {
+    "radioId": "AD864DC7",
+    "timestamp": 1770772644127,
+    "location": {
+      "lat": 40.7561395,
+      "lon": -77.869719,
+      "altitude": 365
+    },
+    "nodes": [
+      {
+        "nodeId": "8BC192AD",
+        "rssi": -120,
+        "snr": -3.75
+      }
+    ]
+  },
+  {
+    "radioId": "AD864DC7",
+    "timestamp": 1770772684126,
+    "location": {
+      "lat": 40.7561395,
+      "lon": -77.869719,
+      "altitude": 365
+    },
+    "nodes": [
+      {
+        "nodeId": "8BC192AD",
+        "rssi": -120,
+        "snr": -3.75
+      }
+    ]
+  },
+  {
+    "radioId": "AD864DC7",
+    "timestamp": 1770772723995,
+    "location": {
+      "lat": 40.7561395,
+      "lon": -77.869719,
+      "altitude": 365
+    },
+    "nodes": [
+      {
+        "nodeId": "8BC192AD",
+        "rssi": -120,
+        "snr": -4.25
+      }
+    ]
+  },
+  {
+    "radioId": "AD864DC7",
+    "timestamp": 1770772763318,
+    "location": {
+      "lat": 40.7561395,
+      "lon": -77.869719,
+      "altitude": 365
+    },
+    "nodes": [
+      {
+        "nodeId": "8BC192AD",
+        "rssi": -120,
+        "snr": -4.25
+      }
+    ]
+  },
+  {
+    "radioId": "AD864DC7",
+    "timestamp": 1770772789627,
+    "location": {
+      "lat": 40.7561395,
+      "lon": -77.869719,
+      "altitude": 365
+    },
+    "nodes": [
+      {
+        "nodeId": "8BC192AD",
+        "rssi": -117,
+        "snr": -0.75
+      }
+    ]
+  },
+  {
+    "radioId": "AD864DC7",
+    "timestamp": 1770773274978,
+    "location": {
+      "lat": 40.8082571,
+      "lon": -77.8960463,
+      "altitude": 335.5
+    },
+    "nodes": [
+      {
+        "nodeId": "8BC192AD",
+        "rssi": -102,
+        "snr": 8.5
+      }
+    ]
+  },
+  {
+    "radioId": "AD864DC7",
+    "timestamp": 1770773289166,
+    "location": {
+      "lat": 40.8082574,
+      "lon": -77.8960475,
+      "altitude": 335.5
+    },
+    "nodes": [
+      {
+        "nodeId": "8BC192AD",
+        "rssi": -102,
+        "snr": 8.5
+      }
+    ]
+  },
+  {
+    "radioId": "AD864DC7",
+    "timestamp": 1770773289183,
+    "location": {
+      "lat": 40.8082574,
+      "lon": -77.8960475,
+      "altitude": 335.5
+    },
+    "nodes": [
+      {
+        "nodeId": "8BC192AD",
+        "rssi": -102,
+        "snr": 8.5
+      }
+    ]
+  },
+  {
+    "radioId": "AD864DC7",
+    "timestamp": 1770773289205,
+    "location": {
+      "lat": 40.8082574,
+      "lon": -77.8960475,
+      "altitude": 335.5
+    },
+    "nodes": [
+      {
+        "nodeId": "8BC192AD",
+        "rssi": -102,
+        "snr": 8.5
+      }
+    ]
+  },
+  {
+    "radioId": "AD864DC7",
+    "timestamp": 1770773289219,
+    "location": {
+      "lat": 40.8082574,
+      "lon": -77.8960475,
+      "altitude": 335.5
+    },
+    "nodes": [
+      {
+        "nodeId": "8BC192AD",
+        "rssi": -102,
+        "snr": 8.5
+      }
+    ]
+  },
+  {
+    "radioId": "AD864DC7",
+    "timestamp": 1770773289245,
+    "location": {
+      "lat": 40.8082574,
+      "lon": -77.8960475,
+      "altitude": 335.5
+    },
+    "nodes": [
+      {
+        "nodeId": "8BC192AD",
+        "rssi": -102,
+        "snr": 8.5
+      }
+    ]
+  },
+  {
+    "radioId": "AD864DC7",
+    "timestamp": 1770773289272,
+    "location": {
+      "lat": 40.8082574,
+      "lon": -77.8960475,
+      "altitude": 335.5
+    },
+    "nodes": [
+      {
+        "nodeId": "8BC192AD",
+        "rssi": -102,
+        "snr": 8.5
+      }
+    ]
+  }
+]
