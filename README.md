@@ -1,5 +1,8 @@
 # mesh-data
 
+
+[![Discord](https://img.shields.io/badge/Discord-Community-5865F2?logo=discord&logoColor=white)](https://discord.gg/Xyhjz7CtuW)
+
 Public dataset of Meshcore network scans collected via [mesh-utility-tracker](https://github.com/just-stuff-tm/mesh-utility-tracker/tree/mesh-utility).
 
 ## Data Structure
