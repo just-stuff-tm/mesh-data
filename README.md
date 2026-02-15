@@ -1,7 +1,22 @@
 # mesh-data
 
+## 💬 Community & Support
 
-[![Discord](https://img.shields.io/badge/Discord-Community-5865F2?logo=discord&logoColor=white)](https://discord.gg/Xyhjz7CtuW)
+<table>
+<tr>
+<td align="center">
+
+[![Discord](https://img.shields.io/badge/Discord-Join%20Server-5865F2?logo=discord&logoColor=white)](https://discord.gg/Xyhjz7CtuW)
+
+</td>
+<td align="center">
+
+[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-Support-FFDD00?logo=buymeacoffee&logoColor=black)](https://www.buymeacoffee.com/Just_Stuff_TM)
+
+</td>
+</tr>
+</table>
+
 
 Public dataset of Meshcore network scans collected via [mesh-utility-tracker](https://github.com/just-stuff-tm/mesh-utility-tracker/tree/mesh-utility).
 
