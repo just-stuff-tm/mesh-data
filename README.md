@@ -19,6 +19,9 @@
 
 
 Public dataset of Meshcore network scans collected via [mesh-utility-tracker](https://github.com/just-stuff-tm/mesh-utility-tracker/tree/mesh-utility).
+<p align="center">
+  <a href="https://mesh-utility-tracker.pages.dev/"><b>🌐 Live App</b></a>
+</p>
 
 ## Data Structure
 
