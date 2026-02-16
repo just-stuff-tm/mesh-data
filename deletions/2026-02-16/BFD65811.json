@@ -1,0 +1,11 @@
+{
+  "radioId": "BFD65811",
+  "publicKey": "BFD658113D107594B77D26AB46C09A6FCDFC6519D430EF5C9646045731407B4E",
+  "deletedAt": "2026-02-16T01:11:42.393Z",
+  "action": "deletion",
+  "ownership": "radio-signature-verified",
+  "challengeExpiresAt": 1771204601396,
+  "d1Deleted": 12,
+  "pendingRemoved": 9,
+  "csvRowsRemoved": 3
+}
