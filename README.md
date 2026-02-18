@@ -1,5 +1,10 @@
 # mesh-data
 
+## Community & Support
+
+[![Discord](https://img.shields.io/badge/Discord-Join%20Server-5865F2?logo=discord&logoColor=white)](https://discord.gg/Xyhjz7CtuW)
+[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-Support-FFDD00?logo=buymeacoffee&logoColor=black)](https://www.buymeacoffee.com/Just_Stuff_TM)
+
 Public dataset of Mesh Utility scan exports.
 
 Live app: https://mesh-utility.org/
