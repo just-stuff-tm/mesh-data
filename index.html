@@ -54,11 +54,33 @@ border-radius:3px;
 display:inline-block;
 }
 
-.excellent{background:#22c55e}
-.good{background:#4ade80}
-.fair{background:#facc15}
-.marginal{background:#fb923c}
-.poor{background:#ef4444}
+.excellent-dot{background:#22c55e}
+.good-dot{background:#4ade80}
+.fair-dot{background:#facc15}
+.marginal-dot{background:#fb923c}
+.poor-dot{background:#ef4444}
+
+/* row colors */
+
+tr.excellent{
+background:rgba(34,197,94,0.15);
+}
+
+tr.good{
+background:rgba(74,222,128,0.12);
+}
+
+tr.fair{
+background:rgba(250,204,21,0.10);
+}
+
+tr.marginal{
+background:rgba(251,146,60,0.10);
+}
+
+tr.poor{
+background:rgba(239,68,68,0.12);
+}
 
 /* controls */
 
@@ -141,10 +163,6 @@ position:sticky;
 top:0;
 }
 
-tr:hover{
-background:#0f172a;
-}
-
 /* stats */
 
 .stats{
@@ -166,27 +184,27 @@ Scans collected by Mesh Utility App and mesh-utility.org
 <div class="legend">
 
 <div class="legend-item">
-<span class="dot excellent"></span>
+<span class="dot excellent-dot"></span>
 Excellent <small>RSSI > -90, SNR > 10</small>
 </div>
 
 <div class="legend-item">
-<span class="dot good"></span>
+<span class="dot good-dot"></span>
 Good <small>RSSI > -100, SNR > 0</small>
 </div>
 
 <div class="legend-item">
-<span class="dot fair"></span>
+<span class="dot fair-dot"></span>
 Fair <small>RSSI > -110, SNR > -7</small>
 </div>
 
 <div class="legend-item">
-<span class="dot marginal"></span>
+<span class="dot marginal-dot"></span>
 Marginal <small>RSSI > -115, SNR > -13</small>
 </div>
 
 <div class="legend-item">
-<span class="dot poor"></span>
+<span class="dot poor-dot"></span>
 Poor <small>Weak signal</small>
 </div>
 
@@ -228,10 +246,8 @@ Poor <small>Weak signal</small>
 </div>
 
 <div class="stats">
-
 Rows Loaded: <span id="loadedCount">0</span><br>
 Filtered Rows: <span id="filteredCount">0</span>
-
 </div>
 
 <script>
@@ -251,8 +267,6 @@ const container=document.getElementById("scrollContainer")
 const tbody=document.querySelector("#table tbody")
 const thead=document.querySelector("#table thead")
 
-/* signal classification */
-
 function classifySignal(rssi,snr){
 
 rssi=parseFloat(rssi)
@@ -264,19 +278,13 @@ if(rssi>-110 && snr>-7) return "fair"
 if(rssi>-115 && snr>-13) return "marginal"
 
 return "poor"
-
 }
 
-/* csv streaming loader */
+/* CSV streaming */
 
 async function loadCSV(){
 
 const response=await fetch("./scans.csv")
-
-if(!response.ok){
-console.error("CSV load failed")
-return
-}
 
 const reader=response.body.getReader()
 const decoder=new TextDecoder()
@@ -287,7 +295,6 @@ let firstRow=true
 while(true){
 
 const {value,done}=await reader.read()
-
 if(done) break
 
 buffer+=decoder.decode(value,{stream:true})
@@ -307,7 +314,6 @@ headers=row
 renderHeader()
 firstRow=false
 continue
-
 }
 
 let obj={}
@@ -319,12 +325,9 @@ if(obj.nodeName) nodeSet.add(obj.nodeName)
 if(obj.observerName) observerSet.add(obj.observerName)
 
 document.getElementById("loadedCount").innerText=allRows.length
-
 }
 
 }
-
-/* populate filters */
 
 populateNodeList()
 populateObservers()
@@ -333,10 +336,7 @@ filtered=[...allRows]
 document.getElementById("filteredCount").innerText=filtered.length
 
 renderVisible()
-
 }
-
-/* table header */
 
 function renderHeader(){
 
@@ -349,15 +349,11 @@ tr.appendChild(th)
 })
 
 thead.appendChild(tr)
-
 }
-
-/* node multi select */
 
 function populateNodeList(){
 
 const list=document.getElementById("nodeList")
-list.innerHTML=""
 
 Array.from(nodeSet).sort().forEach(node=>{
 
@@ -369,12 +365,8 @@ div.innerHTML=
 <span>${node}</span>`
 
 list.appendChild(div)
-
 })
-
 }
-
-/* observer select */
 
 function populateObservers(){
 
@@ -387,12 +379,8 @@ option.value=o
 option.textContent=o
 
 select.appendChild(option)
-
 })
-
 }
-
-/* node search */
 
 document.getElementById("nodeSearch").addEventListener("input",function(){
 
@@ -405,10 +393,7 @@ const name=el.innerText.toLowerCase()
 el.style.display=name.includes(q)?"flex":"none"
 
 })
-
 })
-
-/* virtualization */
 
 function renderVisible(){
 
@@ -422,26 +407,19 @@ const row=filtered[i]
 const tr=document.createElement("tr")
 
 const quality=classifySignal(row.rssi,row.snr)
-
-if(quality==="excellent") tr.style.borderLeft="4px solid #22c55e"
-if(quality==="good") tr.style.borderLeft="4px solid #4ade80"
-if(quality==="fair") tr.style.borderLeft="4px solid #facc15"
-if(quality==="marginal") tr.style.borderLeft="4px solid #fb923c"
-if(quality==="poor") tr.style.borderLeft="4px solid #ef4444"
+tr.className=quality
 
 headers.forEach(h=>{
+
 const td=document.createElement("td")
 td.textContent=row[h]
 tr.appendChild(td)
+
 })
 
 tbody.appendChild(tr)
-
 }
-
 }
-
-/* scrolling */
 
 container.addEventListener("scroll",()=>{
 
@@ -449,8 +427,6 @@ visibleStart=Math.floor(container.scrollTop/rowHeight)
 renderVisible()
 
 })
-
-/* filtering */
 
 function applyFilters(){
 
@@ -467,10 +443,8 @@ document.getElementById("observerFilter").selectedOptions
 filtered=allRows.filter(r=>{
 
 if(search){
-
 if(!Object.values(r).join(" ").toLowerCase().includes(search))
 return false
-
 }
 
 if(start || end){
@@ -479,23 +453,18 @@ let d=new Date(r.datetime_utc)
 
 if(start && d < new Date(start)) return false
 if(end && d > new Date(end+"T23:59:59")) return false
-
 }
 
 if(nodes.length && !nodes.includes(r.nodeName)) return false
 if(observers.length && !observers.includes(r.observerName)) return false
 
 return true
-
 })
 
 visibleStart=0
 document.getElementById("filteredCount").innerText=filtered.length
 renderVisible()
-
 }
-
-/* export */
 
 function downloadFiltered(){
 
@@ -512,10 +481,7 @@ const a=document.createElement("a")
 a.href=url
 a.download="filtered_mesh_scans.csv"
 a.click()
-
 }
-
-/* start */
 
 loadCSV()
 
