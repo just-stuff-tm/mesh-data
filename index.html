@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+
 <title>Mesh Data — Scans collected by Mesh Utility App and mesh-utility.org</title>
 
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -16,9 +17,7 @@ margin:0;
 padding:20px;
 }
 
-h1{
-margin-bottom:5px;
-}
+h1{margin-bottom:5px}
 
 .subtitle{
 color:#94a3b8;
@@ -32,7 +31,7 @@ gap:10px;
 margin-bottom:10px;
 }
 
-input,select,button{
+input,button{
 padding:8px;
 border-radius:8px;
 border:none;
@@ -88,6 +87,7 @@ font-size:12px;
 <body>
 
 <h1>Mesh Data</h1>
+
 <div class="subtitle">
 Scans collected by Mesh Utility App and mesh-utility.org
 </div>
@@ -103,6 +103,7 @@ Scans collected by Mesh Utility App and mesh-utility.org
 <input type="date" id="endDate">
 
 <button onclick="applyFilters()">Filter</button>
+
 <button onclick="downloadFiltered()">Download Filtered</button>
 
 </div>
@@ -120,13 +121,12 @@ Scans collected by Mesh Utility App and mesh-utility.org
 Rows Loaded: <span id="loadedCount">0</span>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
-
 <script>
 
 let headers=[]
 let allRows=[]
 let filtered=[]
+
 let visibleStart=0
 let visibleCount=200
 let rowHeight=26
@@ -135,21 +135,48 @@ const container=document.getElementById("scrollContainer")
 const tbody=document.querySelector("#table tbody")
 const thead=document.querySelector("#table thead")
 
-function loadCSV(){
+/* STREAM CSV SAFELY */
 
-Papa.parse("./scans.csv",{
+async function loadCSV(){
 
-download:true,
-worker:true,
-step:function(results){
+const response=await fetch("./scans.csv")
 
-const row=results.data
+if(!response.ok){
+console.error("CSV failed to load")
+return
+}
 
-if(headers.length===0){
+const reader=response.body.getReader()
+const decoder=new TextDecoder()
+
+let buffer=""
+let firstRow=true
+
+while(true){
+
+const {value,done}=await reader.read()
+
+if(done) break
+
+buffer+=decoder.decode(value,{stream:true})
+
+let lines=buffer.split("\n")
+
+buffer=lines.pop()
+
+for(const line of lines){
+
+if(!line.trim()) continue
+
+const row=line.split(",")
+
+if(firstRow){
 
 headers=row
 renderHeader()
-return
+
+firstRow=false
+continue
 
 }
 
@@ -161,18 +188,17 @@ allRows.push(obj)
 
 document.getElementById("loadedCount").innerText=allRows.length
 
-},
+}
 
-complete:function(){
+}
 
 filtered=[...allRows]
+
 renderVisible()
 
 }
 
-})
-
-}
+/* HEADER */
 
 function renderHeader(){
 
@@ -181,7 +207,9 @@ const tr=document.createElement("tr")
 headers.forEach(h=>{
 
 const th=document.createElement("th")
+
 th.textContent=h
+
 tr.appendChild(th)
 
 })
@@ -189,6 +217,8 @@ tr.appendChild(th)
 thead.appendChild(tr)
 
 }
+
+/* VIRTUALIZED TABLE */
 
 function renderVisible(){
 
@@ -199,6 +229,7 @@ const end=Math.min(visibleStart+visibleCount,filtered.length)
 for(let i=visibleStart;i<end;i++){
 
 const row=filtered[i]
+
 const tr=document.createElement("tr")
 
 headers.forEach(h=>{
@@ -229,6 +260,8 @@ tbody.appendChild(tr)
 
 }
 
+/* SCROLL LAZY RENDER */
+
 container.addEventListener("scroll",()=>{
 
 const scrollTop=container.scrollTop
@@ -238,6 +271,8 @@ visibleStart=Math.floor(scrollTop/rowHeight)
 renderVisible()
 
 })
+
+/* FILTERING */
 
 function applyFilters(){
 
@@ -259,11 +294,9 @@ if(start || end){
 
 let d=new Date(r.datetime_utc)
 
-if(start && d < new Date(start))
-return false
+if(start && d < new Date(start)) return false
 
-if(end && d > new Date(end+"T23:59:59"))
-return false
+if(end && d > new Date(end+"T23:59:59")) return false
 
 }
 
@@ -272,9 +305,12 @@ return true
 })
 
 visibleStart=0
+
 renderVisible()
 
 }
+
+/* EXPORT FILTERED */
 
 function downloadFiltered(){
 
@@ -287,14 +323,20 @@ csv+=headers.map(h=>r[h]).join(",")+"\n"
 })
 
 const blob=new Blob([csv],{type:"text/csv"})
+
 const url=URL.createObjectURL(blob)
 
 const a=document.createElement("a")
+
 a.href=url
+
 a.download="filtered_mesh_scans.csv"
+
 a.click()
 
 }
+
+/* START */
 
 loadCSV()
 
