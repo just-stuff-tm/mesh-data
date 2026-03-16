@@ -8,7 +8,7 @@
 Public dataset of Mesh Utility scan exports.
 
 Live app: https://mesh-utility.org/
-Source app: https://github.com/just-stuff-tm/mesh-utility-tracker
+Source app: https://github.com/mesh-utility/mesh-utility
 
 ## Repository Structure
 
