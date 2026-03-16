@@ -2,92 +2,99 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Mesh-Data</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta description="Scan Data Collected By Mesh-Utility.org">
+<title>Mesh Data — Scans collected by Mesh Utility App and mesh-utility.org</title>
+
+<meta name="viewport" content="width=device-width,initial-scale=1">
 
 <style>
+
 body{
-    font-family:system-ui,-apple-system,Segoe UI,Roboto;
-    background:#0f172a;
-    color:#e5e7eb;
-    margin:0;
-    padding:20px;
+font-family:system-ui,-apple-system,Segoe UI,Roboto;
+background:#0f172a;
+color:#e5e7eb;
+margin:0;
+padding:20px;
 }
 
-h1{margin-bottom:15px}
+h1{
+margin-bottom:5px;
+}
+
+.subtitle{
+color:#94a3b8;
+margin-bottom:15px;
+}
 
 .controls{
-    display:flex;
-    flex-wrap:wrap;
-    gap:10px;
-    margin-bottom:15px;
+display:flex;
+flex-wrap:wrap;
+gap:10px;
+margin-bottom:10px;
 }
 
 input,select,button{
-    padding:8px 10px;
-    border-radius:8px;
-    border:none;
-    background:#1e293b;
-    color:white;
+padding:8px;
+border-radius:8px;
+border:none;
+background:#1e293b;
+color:white;
 }
 
 button{
-    background:#3b82f6;
-    cursor:pointer;
+background:#3b82f6;
+cursor:pointer;
 }
 
-button:hover{
-    background:#2563eb;
+.container{
+height:70vh;
+overflow:auto;
+background:#020617;
+border-radius:10px;
 }
 
 table{
-    width:100%;
-    border-collapse:collapse;
-    background:#020617;
-}
-
-thead{
-    background:#1e293b;
+border-collapse:collapse;
+width:100%;
 }
 
 th,td{
-    padding:8px;
-    border-bottom:1px solid #1f2937;
-    font-size:13px;
+padding:6px 10px;
+border-bottom:1px solid #1f2937;
+font-size:12px;
+}
+
+thead{
+background:#1e293b;
+position:sticky;
+top:0;
 }
 
 tr:hover{
-    background:#0f172a;
+background:#0f172a;
 }
-
-th{cursor:pointer}
 
 .good{color:#22c55e}
 .bad{color:#ef4444}
 
-.container{
-    overflow:auto;
-    max-height:80vh;
+.stats{
+margin-top:10px;
+color:#94a3b8;
+font-size:12px;
 }
+
 </style>
 </head>
 
 <body>
 
-<h1>Radio Scan Viewer</h1>
+<h1>Mesh Data</h1>
+<div class="subtitle">
+Scans collected by Mesh Utility App and mesh-utility.org
+</div>
 
 <div class="controls">
 
-<input id="search" placeholder="Search anything...">
-
-<select id="nodeFilter">
-<option value="">All Nodes</option>
-</select>
-
-<select id="observerFilter">
-<option value="">All Observers</option>
-</select>
+<input id="search" placeholder="Search">
 
 <label>Start</label>
 <input type="date" id="startDate">
@@ -95,173 +102,199 @@ th{cursor:pointer}
 <label>End</label>
 <input type="date" id="endDate">
 
+<button onclick="applyFilters()">Filter</button>
 <button onclick="downloadFiltered()">Download Filtered</button>
 
 </div>
 
-<div class="container">
+<div class="container" id="scrollContainer">
+
 <table id="table">
 <thead></thead>
 <tbody></tbody>
 </table>
+
 </div>
+
+<div class="stats">
+Rows Loaded: <span id="loadedCount">0</span>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
 <script>
 
-let rawData=[]
-let filtered=[]
 let headers=[]
-let sortCol=null
-let sortAsc=true
+let allRows=[]
+let filtered=[]
+let visibleStart=0
+let visibleCount=200
+let rowHeight=26
 
-async function loadCSV(){
+const container=document.getElementById("scrollContainer")
+const tbody=document.querySelector("#table tbody")
+const thead=document.querySelector("#table thead")
 
-    const res=await fetch("scans.csv")
-    const text=await res.text()
+function loadCSV(){
 
-    const rows=text.trim().split("\n")
-    headers=rows[0].split(",")
+Papa.parse("scans.csv",{
 
-    rawData=rows.slice(1).map(r=>{
-        const obj={}
-        const cols=r.split(",")
-        headers.forEach((h,i)=>obj[h]=cols[i]||"")
-        return obj
-    })
+download:true,
+worker:true,
+step:function(results){
 
-    populateFilters()
-    applyFilters()
+const row=results.data
+
+if(headers.length===0){
+
+headers=row
+renderHeader()
+return
+
 }
 
-function populateFilters(){
+let obj={}
 
-    const nodes=[...new Set(rawData.map(d=>d.nodeName).filter(Boolean))]
-    const observers=[...new Set(rawData.map(d=>d.observerName).filter(Boolean))]
+headers.forEach((h,i)=>obj[h]=row[i]||"")
 
-    nodes.forEach(n=>{
-        const o=document.createElement("option")
-        o.value=n
-        o.textContent=n
-        nodeFilter.appendChild(o)
-    })
+allRows.push(obj)
 
-    observers.forEach(n=>{
-        const o=document.createElement("option")
-        o.value=n
-        o.textContent=n
-        observerFilter.appendChild(o)
-    })
+document.getElementById("loadedCount").innerText=allRows.length
+
+},
+
+complete:function(){
+
+filtered=[...allRows]
+renderVisible()
+
 }
+
+})
+
+}
+
+function renderHeader(){
+
+const tr=document.createElement("tr")
+
+headers.forEach(h=>{
+
+const th=document.createElement("th")
+th.textContent=h
+tr.appendChild(th)
+
+})
+
+thead.appendChild(tr)
+
+}
+
+function renderVisible(){
+
+tbody.innerHTML=""
+
+const end=Math.min(visibleStart+visibleCount,filtered.length)
+
+for(let i=visibleStart;i<end;i++){
+
+const row=filtered[i]
+const tr=document.createElement("tr")
+
+headers.forEach(h=>{
+
+const td=document.createElement("td")
+
+let val=row[h]
+
+if(h==="rssi"){
+
+let n=parseFloat(val)
+
+if(!isNaN(n)){
+td.className=n>-80?"good":"bad"
+}
+
+}
+
+td.textContent=val
+
+tr.appendChild(td)
+
+})
+
+tbody.appendChild(tr)
+
+}
+
+}
+
+container.addEventListener("scroll",()=>{
+
+const scrollTop=container.scrollTop
+
+visibleStart=Math.floor(scrollTop/rowHeight)
+
+renderVisible()
+
+})
 
 function applyFilters(){
 
-    const search=document.getElementById("search").value.toLowerCase()
-    const node=nodeFilter.value
-    const observer=observerFilter.value
-    const start=startDate.value
-    const end=endDate.value
+const search=document.getElementById("search").value.toLowerCase()
 
-    filtered=rawData.filter(r=>{
+const start=document.getElementById("startDate").value
+const end=document.getElementById("endDate").value
 
-        if(node && r.nodeName!==node) return false
-        if(observer && r.observerName!==observer) return false
+filtered=allRows.filter(r=>{
 
-        if(start || end){
-            const rowDate=new Date(r.datetime_utc)
+if(search){
 
-            if(start && rowDate < new Date(start)) return false
-            if(end && rowDate > new Date(end+"T23:59:59")) return false
-        }
+if(!Object.values(r).join(" ").toLowerCase().includes(search))
+return false
 
-        if(search){
-            if(!Object.values(r).join(" ").toLowerCase().includes(search))
-                return false
-        }
-
-        return true
-    })
-
-    if(sortCol){
-        filtered.sort((a,b)=>{
-            if(a[sortCol]>b[sortCol]) return sortAsc?1:-1
-            if(a[sortCol]<b[sortCol]) return sortAsc?-1:1
-            return 0
-        })
-    }
-
-    renderTable()
 }
 
-function renderTable(){
+if(start || end){
 
-    const thead=document.querySelector("#table thead")
-    const tbody=document.querySelector("#table tbody")
+let d=new Date(r.datetime_utc)
 
-    thead.innerHTML=""
-    tbody.innerHTML=""
+if(start && d < new Date(start))
+return false
 
-    const tr=document.createElement("tr")
+if(end && d > new Date(end+"T23:59:59"))
+return false
 
-    headers.forEach(h=>{
-        const th=document.createElement("th")
-        th.textContent=h
-        th.onclick=()=>{
-            if(sortCol===h) sortAsc=!sortAsc
-            else{
-                sortCol=h
-                sortAsc=true
-            }
-            applyFilters()
-        }
-        tr.appendChild(th)
-    })
+}
 
-    thead.appendChild(tr)
+return true
 
-    filtered.forEach(row=>{
-        const tr=document.createElement("tr")
+})
 
-        headers.forEach(h=>{
-            const td=document.createElement("td")
-            let val=row[h]
+visibleStart=0
+renderVisible()
 
-            if(h==="rssi"){
-                const n=parseFloat(val)
-                if(!isNaN(n)){
-                    td.className=n>-80?"good":"bad"
-                }
-            }
-
-            td.textContent=val
-            tr.appendChild(td)
-        })
-
-        tbody.appendChild(tr)
-    })
 }
 
 function downloadFiltered(){
 
-    let csv=headers.join(",")+"\n"
+let csv=headers.join(",")+"\n"
 
-    filtered.forEach(r=>{
-        csv+=headers.map(h=>r[h]).join(",")+"\n"
-    })
+filtered.forEach(r=>{
 
-    const blob=new Blob([csv],{type:"text/csv"})
-    const url=URL.createObjectURL(blob)
+csv+=headers.map(h=>r[h]).join(",")+"\n"
 
-    const a=document.createElement("a")
-    a.href=url
-    a.download="filtered_scans.csv"
-    a.click()
+})
+
+const blob=new Blob([csv],{type:"text/csv"})
+const url=URL.createObjectURL(blob)
+
+const a=document.createElement("a")
+a.href=url
+a.download="filtered_mesh_scans.csv"
+a.click()
+
 }
-
-search.oninput=applyFilters
-nodeFilter.onchange=applyFilters
-observerFilter.onchange=applyFilters
-startDate.onchange=applyFilters
-endDate.onchange=applyFilters
 
 loadCSV()
 
