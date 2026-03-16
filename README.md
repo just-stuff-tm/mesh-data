@@ -83,7 +83,6 @@ Data is produced by users who opt in from Mesh Utility:
 
 ## Support
 
-- App issues: https://github.com/just-stuff-tm/mesh-utility-tracker/issues
 - Community: https://discord.gg/Xyhjz7CtuW
 
 ## License
