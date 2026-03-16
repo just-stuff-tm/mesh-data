@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Mesh-Data</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta description="Scan Data Collected By Mesh-Utility.org">
+
+<style>
+body{
+    font-family:system-ui,-apple-system,Segoe UI,Roboto;
+    background:#0f172a;
+    color:#e5e7eb;
+    margin:0;
+    padding:20px;
+}
+
+h1{margin-bottom:15px}
+
+.controls{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-bottom:15px;
+}
+
+input,select,button{
+    padding:8px 10px;
+    border-radius:8px;
+    border:none;
+    background:#1e293b;
+    color:white;
+}
+
+button{
+    background:#3b82f6;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#2563eb;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    background:#020617;
+}
+
+thead{
+    background:#1e293b;
+}
+
+th,td{
+    padding:8px;
+    border-bottom:1px solid #1f2937;
+    font-size:13px;
+}
+
+tr:hover{
+    background:#0f172a;
+}
+
+th{cursor:pointer}
+
+.good{color:#22c55e}
+.bad{color:#ef4444}
+
+.container{
+    overflow:auto;
+    max-height:80vh;
+}
+</style>
+</head>
+
+<body>
+
+<h1>Radio Scan Viewer</h1>
+
+<div class="controls">
+
+<input id="search" placeholder="Search anything...">
+
+<select id="nodeFilter">
+<option value="">All Nodes</option>
+</select>
+
+<select id="observerFilter">
+<option value="">All Observers</option>
+</select>
+
+<label>Start</label>
+<input type="date" id="startDate">
+
+<label>End</label>
+<input type="date" id="endDate">
+
+<button onclick="downloadFiltered()">Download Filtered</button>
+
+</div>
+
+<div class="container">
+<table id="table">
+<thead></thead>
+<tbody></tbody>
+</table>
+</div>
+
+<script>
+
+let rawData=[]
+let filtered=[]
+let headers=[]
+let sortCol=null
+let sortAsc=true
+
+async function loadCSV(){
+
+    const res=await fetch("scans.csv")
+    const text=await res.text()
+
+    const rows=text.trim().split("\n")
+    headers=rows[0].split(",")
+
+    rawData=rows.slice(1).map(r=>{
+        const obj={}
+        const cols=r.split(",")
+        headers.forEach((h,i)=>obj[h]=cols[i]||"")
+        return obj
+    })
+
+    populateFilters()
+    applyFilters()
+}
+
+function populateFilters(){
+
+    const nodes=[...new Set(rawData.map(d=>d.nodeName).filter(Boolean))]
+    const observers=[...new Set(rawData.map(d=>d.observerName).filter(Boolean))]
+
+    nodes.forEach(n=>{
+        const o=document.createElement("option")
+        o.value=n
+        o.textContent=n
+        nodeFilter.appendChild(o)
+    })
+
+    observers.forEach(n=>{
+        const o=document.createElement("option")
+        o.value=n
+        o.textContent=n
+        observerFilter.appendChild(o)
+    })
+}
+
+function applyFilters(){
+
+    const search=document.getElementById("search").value.toLowerCase()
+    const node=nodeFilter.value
+    const observer=observerFilter.value
+    const start=startDate.value
+    const end=endDate.value
+
+    filtered=rawData.filter(r=>{
+
+        if(node && r.nodeName!==node) return false
+        if(observer && r.observerName!==observer) return false
+
+        if(start || end){
+            const rowDate=new Date(r.datetime_utc)
+
+            if(start && rowDate < new Date(start)) return false
+            if(end && rowDate > new Date(end+"T23:59:59")) return false
+        }
+
+        if(search){
+            if(!Object.values(r).join(" ").toLowerCase().includes(search))
+                return false
+        }
+
+        return true
+    })
+
+    if(sortCol){
+        filtered.sort((a,b)=>{
+            if(a[sortCol]>b[sortCol]) return sortAsc?1:-1
+            if(a[sortCol]<b[sortCol]) return sortAsc?-1:1
+            return 0
+        })
+    }
+
+    renderTable()
+}
+
+function renderTable(){
+
+    const thead=document.querySelector("#table thead")
+    const tbody=document.querySelector("#table tbody")
+
+    thead.innerHTML=""
+    tbody.innerHTML=""
+
+    const tr=document.createElement("tr")
+
+    headers.forEach(h=>{
+        const th=document.createElement("th")
+        th.textContent=h
+        th.onclick=()=>{
+            if(sortCol===h) sortAsc=!sortAsc
+            else{
+                sortCol=h
+                sortAsc=true
+            }
+            applyFilters()
+        }
+        tr.appendChild(th)
+    })
+
+    thead.appendChild(tr)
+
+    filtered.forEach(row=>{
+        const tr=document.createElement("tr")
+
+        headers.forEach(h=>{
+            const td=document.createElement("td")
+            let val=row[h]
+
+            if(h==="rssi"){
+                const n=parseFloat(val)
+                if(!isNaN(n)){
+                    td.className=n>-80?"good":"bad"
+                }
+            }
+
+            td.textContent=val
+            tr.appendChild(td)
+        })
+
+        tbody.appendChild(tr)
+    })
+}
+
+function downloadFiltered(){
+
+    let csv=headers.join(",")+"\n"
+
+    filtered.forEach(r=>{
+        csv+=headers.map(h=>r[h]).join(",")+"\n"
+    })
+
+    const blob=new Blob([csv],{type:"text/csv"})
+    const url=URL.createObjectURL(blob)
+
+    const a=document.createElement("a")
+    a.href=url
+    a.download="filtered_scans.csv"
+    a.click()
+}
+
+search.oninput=applyFilters
+nodeFilter.onchange=applyFilters
+observerFilter.onchange=applyFilters
+startDate.onchange=applyFilters
+endDate.onchange=applyFilters
+
+loadCSV()
+
+</script>
+
+</body>
+</html>
