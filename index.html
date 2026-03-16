@@ -2,9 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-
 <title>Mesh Data — Scans collected by Mesh Utility App and mesh-utility.org</title>
-
 <meta name="viewport" content="width=device-width,initial-scale=1">
 
 <style>
@@ -17,32 +15,106 @@ margin:0;
 padding:20px;
 }
 
-h1{margin-bottom:5px}
+h1{margin-bottom:4px}
 
 .subtitle{
 color:#94a3b8;
-margin-bottom:15px;
+margin-bottom:14px;
 }
+
+/* legend */
+
+.legend{
+display:flex;
+flex-direction:column;
+gap:6px;
+background:#020617;
+padding:12px;
+border-radius:10px;
+width:260px;
+margin-bottom:16px;
+}
+
+.legend-item{
+display:flex;
+align-items:center;
+gap:8px;
+font-size:13px;
+}
+
+.legend small{
+margin-left:auto;
+color:#94a3b8;
+}
+
+.dot{
+width:12px;
+height:12px;
+border-radius:3px;
+display:inline-block;
+}
+
+.excellent{background:#22c55e}
+.good{background:#4ade80}
+.fair{background:#facc15}
+.marginal{background:#fb923c}
+.poor{background:#ef4444}
+
+/* controls */
 
 .controls{
 display:flex;
 flex-wrap:wrap;
-gap:10px;
-margin-bottom:10px;
+gap:12px;
+margin-bottom:14px;
+align-items:flex-start;
 }
 
-input,button{
+input,select,button{
 padding:8px;
 border-radius:8px;
 border:none;
 background:#1e293b;
 color:white;
+font-size:13px;
 }
 
 button{
 background:#3b82f6;
 cursor:pointer;
 }
+
+/* node multi-select */
+
+.filter-box{
+display:flex;
+flex-direction:column;
+gap:4px;
+}
+
+.multi-list{
+background:#020617;
+border-radius:8px;
+padding:6px;
+height:140px;
+overflow:auto;
+min-width:200px;
+border:1px solid #1f2937;
+}
+
+.node-option{
+display:flex;
+align-items:center;
+gap:6px;
+font-size:12px;
+padding:3px;
+}
+
+.node-option:hover{
+background:#0f172a;
+}
+
+/* table */
 
 .container{
 height:70vh;
@@ -60,6 +132,7 @@ th,td{
 padding:6px 10px;
 border-bottom:1px solid #1f2937;
 font-size:12px;
+white-space:nowrap;
 }
 
 thead{
@@ -72,8 +145,7 @@ tr:hover{
 background:#0f172a;
 }
 
-.good{color:#22c55e}
-.bad{color:#ef4444}
+/* stats */
 
 .stats{
 margin-top:10px;
@@ -87,9 +159,37 @@ font-size:12px;
 <body>
 
 <h1>Mesh Data</h1>
-
 <div class="subtitle">
 Scans collected by Mesh Utility App and mesh-utility.org
+</div>
+
+<div class="legend">
+
+<div class="legend-item">
+<span class="dot excellent"></span>
+Excellent <small>RSSI > -90, SNR > 10</small>
+</div>
+
+<div class="legend-item">
+<span class="dot good"></span>
+Good <small>RSSI > -100, SNR > 0</small>
+</div>
+
+<div class="legend-item">
+<span class="dot fair"></span>
+Fair <small>RSSI > -110, SNR > -7</small>
+</div>
+
+<div class="legend-item">
+<span class="dot marginal"></span>
+Marginal <small>RSSI > -115, SNR > -13</small>
+</div>
+
+<div class="legend-item">
+<span class="dot poor"></span>
+Poor <small>Weak signal</small>
+</div>
+
 </div>
 
 <div class="controls">
@@ -102,8 +202,18 @@ Scans collected by Mesh Utility App and mesh-utility.org
 <label>End</label>
 <input type="date" id="endDate">
 
-<button onclick="applyFilters()">Filter</button>
+<div class="filter-box">
+<label>Search Nodes</label>
+<input id="nodeSearch" placeholder="Search nodes">
+<div id="nodeList" class="multi-list"></div>
+</div>
 
+<div class="filter-box">
+<label>Observers</label>
+<select id="observerFilter" multiple size="6"></select>
+</div>
+
+<button onclick="applyFilters()">Filter</button>
 <button onclick="downloadFiltered()">Download Filtered</button>
 
 </div>
@@ -118,7 +228,10 @@ Scans collected by Mesh Utility App and mesh-utility.org
 </div>
 
 <div class="stats">
-Rows Loaded: <span id="loadedCount">0</span>
+
+Rows Loaded: <span id="loadedCount">0</span><br>
+Filtered Rows: <span id="filteredCount">0</span>
+
 </div>
 
 <script>
@@ -126,6 +239,9 @@ Rows Loaded: <span id="loadedCount">0</span>
 let headers=[]
 let allRows=[]
 let filtered=[]
+
+let nodeSet=new Set()
+let observerSet=new Set()
 
 let visibleStart=0
 let visibleCount=200
@@ -135,14 +251,30 @@ const container=document.getElementById("scrollContainer")
 const tbody=document.querySelector("#table tbody")
 const thead=document.querySelector("#table thead")
 
-/* STREAM CSV SAFELY */
+/* signal classification */
+
+function classifySignal(rssi,snr){
+
+rssi=parseFloat(rssi)
+snr=parseFloat(snr)
+
+if(rssi>-90 && snr>10) return "excellent"
+if(rssi>-100 && snr>0) return "good"
+if(rssi>-110 && snr>-7) return "fair"
+if(rssi>-115 && snr>-13) return "marginal"
+
+return "poor"
+
+}
+
+/* csv streaming loader */
 
 async function loadCSV(){
 
 const response=await fetch("./scans.csv")
 
 if(!response.ok){
-console.error("CSV failed to load")
+console.error("CSV load failed")
 return
 }
 
@@ -161,7 +293,6 @@ if(done) break
 buffer+=decoder.decode(value,{stream:true})
 
 let lines=buffer.split("\n")
-
 buffer=lines.pop()
 
 for(const line of lines){
@@ -174,17 +305,18 @@ if(firstRow){
 
 headers=row
 renderHeader()
-
 firstRow=false
 continue
 
 }
 
 let obj={}
-
 headers.forEach((h,i)=>obj[h]=row[i]||"")
 
 allRows.push(obj)
+
+if(obj.nodeName) nodeSet.add(obj.nodeName)
+if(obj.observerName) observerSet.add(obj.observerName)
 
 document.getElementById("loadedCount").innerText=allRows.length
 
@@ -192,33 +324,91 @@ document.getElementById("loadedCount").innerText=allRows.length
 
 }
 
+/* populate filters */
+
+populateNodeList()
+populateObservers()
+
 filtered=[...allRows]
+document.getElementById("filteredCount").innerText=filtered.length
 
 renderVisible()
 
 }
 
-/* HEADER */
+/* table header */
 
 function renderHeader(){
 
 const tr=document.createElement("tr")
 
 headers.forEach(h=>{
-
 const th=document.createElement("th")
-
 th.textContent=h
-
 tr.appendChild(th)
-
 })
 
 thead.appendChild(tr)
 
 }
 
-/* VIRTUALIZED TABLE */
+/* node multi select */
+
+function populateNodeList(){
+
+const list=document.getElementById("nodeList")
+list.innerHTML=""
+
+Array.from(nodeSet).sort().forEach(node=>{
+
+const div=document.createElement("div")
+div.className="node-option"
+
+div.innerHTML=
+`<input type="checkbox" value="${node}">
+<span>${node}</span>`
+
+list.appendChild(div)
+
+})
+
+}
+
+/* observer select */
+
+function populateObservers(){
+
+const select=document.getElementById("observerFilter")
+
+Array.from(observerSet).sort().forEach(o=>{
+
+const option=document.createElement("option")
+option.value=o
+option.textContent=o
+
+select.appendChild(option)
+
+})
+
+}
+
+/* node search */
+
+document.getElementById("nodeSearch").addEventListener("input",function(){
+
+const q=this.value.toLowerCase()
+
+document.querySelectorAll("#nodeList .node-option").forEach(el=>{
+
+const name=el.innerText.toLowerCase()
+
+el.style.display=name.includes(q)?"flex":"none"
+
+})
+
+})
+
+/* virtualization */
 
 function renderVisible(){
 
@@ -229,29 +419,20 @@ const end=Math.min(visibleStart+visibleCount,filtered.length)
 for(let i=visibleStart;i<end;i++){
 
 const row=filtered[i]
-
 const tr=document.createElement("tr")
 
+const quality=classifySignal(row.rssi,row.snr)
+
+if(quality==="excellent") tr.style.borderLeft="4px solid #22c55e"
+if(quality==="good") tr.style.borderLeft="4px solid #4ade80"
+if(quality==="fair") tr.style.borderLeft="4px solid #facc15"
+if(quality==="marginal") tr.style.borderLeft="4px solid #fb923c"
+if(quality==="poor") tr.style.borderLeft="4px solid #ef4444"
+
 headers.forEach(h=>{
-
 const td=document.createElement("td")
-
-let val=row[h]
-
-if(h==="rssi"){
-
-let n=parseFloat(val)
-
-if(!isNaN(n)){
-td.className=n>-80?"good":"bad"
-}
-
-}
-
-td.textContent=val
-
+td.textContent=row[h]
 tr.appendChild(td)
-
 })
 
 tbody.appendChild(tr)
@@ -260,26 +441,28 @@ tbody.appendChild(tr)
 
 }
 
-/* SCROLL LAZY RENDER */
+/* scrolling */
 
 container.addEventListener("scroll",()=>{
 
-const scrollTop=container.scrollTop
-
-visibleStart=Math.floor(scrollTop/rowHeight)
-
+visibleStart=Math.floor(container.scrollTop/rowHeight)
 renderVisible()
 
 })
 
-/* FILTERING */
+/* filtering */
 
 function applyFilters(){
 
 const search=document.getElementById("search").value.toLowerCase()
-
 const start=document.getElementById("startDate").value
 const end=document.getElementById("endDate").value
+
+const nodes=Array.from(document.querySelectorAll("#nodeList input:checked")).map(x=>x.value)
+
+const observers=Array.from(
+document.getElementById("observerFilter").selectedOptions
+).map(o=>o.value)
 
 filtered=allRows.filter(r=>{
 
@@ -295,48 +478,44 @@ if(start || end){
 let d=new Date(r.datetime_utc)
 
 if(start && d < new Date(start)) return false
-
 if(end && d > new Date(end+"T23:59:59")) return false
 
 }
+
+if(nodes.length && !nodes.includes(r.nodeName)) return false
+if(observers.length && !observers.includes(r.observerName)) return false
 
 return true
 
 })
 
 visibleStart=0
-
+document.getElementById("filteredCount").innerText=filtered.length
 renderVisible()
 
 }
 
-/* EXPORT FILTERED */
+/* export */
 
 function downloadFiltered(){
 
 let csv=headers.join(",")+"\n"
 
 filtered.forEach(r=>{
-
 csv+=headers.map(h=>r[h]).join(",")+"\n"
-
 })
 
 const blob=new Blob([csv],{type:"text/csv"})
-
 const url=URL.createObjectURL(blob)
 
 const a=document.createElement("a")
-
 a.href=url
-
 a.download="filtered_mesh_scans.csv"
-
 a.click()
 
 }
 
-/* START */
+/* start */
 
 loadCSV()
 
