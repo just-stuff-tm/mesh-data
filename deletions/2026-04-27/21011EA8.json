@@ -1,0 +1,11 @@
+{
+  "radioId": "21011EA8",
+  "publicKey": "21011EA85E375B02F466E7B799E9D9C2B5390517923D1DFA488A6D2ED82405E8",
+  "deletedAt": "2026-04-27T23:18:02.610Z",
+  "action": "deletion",
+  "ownership": "radio-signature-verified",
+  "challengeExpiresAt": 1777332179612,
+  "d1Deleted": 2,
+  "pendingRemoved": 0,
+  "csvRowsRemoved": 2
+}
